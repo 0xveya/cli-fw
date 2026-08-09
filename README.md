@@ -29,10 +29,13 @@ nested commands, generated help, and typed parse errors.
 ## Where I use it
 
 This is my internal CLI framework for 42 projects. The latest implementation
-was extracted from `coding/42/cc/pac-man`, with behavior checked against
-`coding/42/cc/rag-against-the-machine`. Pacman uses it for the game command and
-RAG uses it to validate command syntax and produce diagnostics before command
-execution.
+was extracted from
+[Pacman](https://github.com/Valentins-and-Veyas-42-group-projects/pac-man), a
+work-in-progress group project in the 42 organization,
+with behavior checked against
+[RAG Against the Machine](https://github.com/0xveya/42-rag-against-the-machine).
+Pacman uses it for the game command and RAG uses it to validate command syntax
+and produce diagnostics before command execution.
 
 ## Dependencies
 
