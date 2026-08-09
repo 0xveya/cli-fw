@@ -1,5 +1,10 @@
 # cli-fw
 
+[![PyPI](https://img.shields.io/pypi/v/cli-fw)](https://pypi.org/project/cli-fw/)
+[![CI](https://github.com/0xveya/cli-fw/actions/workflows/ci.yml/badge.svg)](https://github.com/0xveya/cli-fw/actions/workflows/ci.yml)
+
+**[View cli-fw on PyPI](https://pypi.org/project/cli-fw/)**
+
 A compact dataclass-driven command-line framework extracted from the Pacman and
 RAG projects.
 
@@ -26,6 +31,24 @@ parsed = command.execute(["--port", "8080"])
 It supports positional and optional arguments, choices, booleans, lists,
 nested commands, generated help, and typed parse errors.
 
+## Commands and subcommands
+
+Define arguments in dataclasses, attach each schema to a `Command`, then call
+`execute()`. A command callback receives the validated dataclass instance. A
+root command can contain any number of subcommands:
+
+```python
+root = Command("project", short="Index and search a project")
+root.add_command(Command("index", schema=Index, run=run_index))
+root.add_command(Command("search", schema=Search, run=run_search))
+result = root.execute()
+```
+
+Run it like `python app.py index ./src --workers 8`, or add `--help` at any
+command level. See the complete runnable
+[subcommand example](examples/subcommands.py), including positional values,
+defaults, boolean flags, callbacks, and diagnostic handling.
+
 ## Where I use it
 
 This is my internal CLI framework for 42 projects. The latest implementation
@@ -41,6 +64,19 @@ and produce diagnostics before command execution.
 
 - Python 3.10+
 - `typed-errs` for `Result`, `Err`, and diagnostics
+
+## Use and contributions
+
+This is a personal library, but it is not private or locked to my projects.
+You may use it in general Python work and in 42 projects under the MIT license;
+just follow the rules that apply to your campus and assignment.
+
+Contributions are welcome: open an issue or send a pull request. I do not care
+whether a contribution is written by hand, AI-assisted, or generated another
+way; I care about whether it is correct, tested, understandable, and a good fit.
+Because this is opinionated personal infrastructure, pull requests are reviewed
+selectively and are likely to be rejected unless they clearly improve the
+library without making it harder to maintain.
 
 ## Development and release
 
