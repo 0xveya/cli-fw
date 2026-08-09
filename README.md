@@ -26,6 +26,14 @@ parsed = command.execute(["--port", "8080"])
 It supports positional and optional arguments, choices, booleans, lists,
 nested commands, generated help, and typed parse errors.
 
+## Where I use it
+
+This is my internal CLI framework for 42 projects. The latest implementation
+was extracted from `coding/42/cc/pac-man`, with behavior checked against
+`coding/42/cc/rag-against-the-machine`. Pacman uses it for the game command and
+RAG uses it to validate command syntax and produce diagnostics before command
+execution.
+
 ## Dependencies
 
 - Python 3.10+
