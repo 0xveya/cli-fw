@@ -1,0 +1,59 @@
+[project]
+name = "cli-fw"
+version = "0.0.0"
+description = "A small dataclass-driven command-line framework"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [{ name = "Veya Fürst", email = "ghgstefan@gmail.com" }]
+keywords = ["cli", "arguments", "dataclass", "parser"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Programming Language :: Python :: 3 :: Only",
+    "Typing :: Typed",
+]
+dependencies = ["typed-errs>=0,<1"]
+
+[tool.uv.sources]
+typed-errs = { git = "https://github.com/0xveya/typed-errs" }
+
+[project.urls]
+Repository = "https://github.com/0xveya/cli-fw"
+
+[dependency-groups]
+dev = ["basedpyright", "mypy", "pytest", "ruff"]
+
+[build-system]
+requires = ["setuptools>=80"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.package-data]
+cli_fw = ["py.typed"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.mypy]
+python_version = "3.10"
+files = ["src"]
+disallow_untyped_defs = true
+check_untyped_defs = true
+
+[tool.basedpyright]
+include = ["src", "tests"]
+pythonVersion = "3.10"
+typeCheckingMode = "standard"
