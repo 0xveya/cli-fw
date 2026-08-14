@@ -7,9 +7,10 @@ from enum import Enum, auto
 from os.path import basename
 from typing import Any, TypeVar, cast, get_args, get_origin, get_type_hints
 
-from typed_errs import Diagnostic, Err, Ok, Result
+from typed_errs import Diagnostic, Err, Nothing, Ok, Option, Result, Some
 
 T = TypeVar("T")
+NO_DIAGNOSTIC: Option[Diagnostic] = Nothing()
 
 
 class CliError(Enum):
@@ -25,7 +26,7 @@ class CliError(Enum):
 HelpRenderer = Callable[["Parser"], None]
 
 
-def CliErr(error: CliError, diagnostic: Diagnostic | None = None) -> Err[CliError]:
+def CliErr(error: CliError, diagnostic: Option[Diagnostic] = NO_DIAGNOSTIC) -> Err[CliError]:
     """Build a CLI error with module defaults.
 
     Returns:
@@ -296,9 +297,9 @@ class Parser:
                         line_text=raw_cmd_string,
                         col_start=max(0, col_start),
                         col_end=max(0, col_end),
-                        help_msg=help_msg,
+                        help_msg=Some(help_msg),
                     )
-                    return CliErr(CliError.UNKNOWN_ARGUMENT, diagnostic=diag)
+                    return CliErr(CliError.UNKNOWN_ARGUMENT, diagnostic=Some(diag))
 
                 arg_def = next(a for a in self.args if a.name == name)
 
@@ -316,11 +317,11 @@ class Parser:
                                 line_text=raw_cmd_string,
                                 col_start=max(0, col_start),
                                 col_end=max(0, col_end),
-                                help_msg=(f"Option --{name} requires an argument"),
+                                help_msg=Some(f"Option --{name} requires an argument"),
                             )
                             return CliErr(
                                 CliError.MISSING_ARGUMENT_VALUE,
-                                diag,
+                                Some(diag),
                             )
                     except StopIteration:
                         diag = Diagnostic(
@@ -329,9 +330,9 @@ class Parser:
                             line_text=raw_cmd_string,
                             col_start=max(0, col_start),
                             col_end=max(0, col_end),
-                            help_msg=f"Option --{name} requires an argument",
+                            help_msg=Some(f"Option --{name} requires an argument"),
                         )
-                        return CliErr(CliError.MISSING_ARGUMENT_VALUE, diag)
+                        return CliErr(CliError.MISSING_ARGUMENT_VALUE, Some(diag))
 
                     parsed_tokens.append((name, val))
             else:
@@ -372,9 +373,9 @@ class Parser:
                 line_text=raw_cmd_string,
                 col_start=max(0, col_start),
                 col_end=max(0, col_end),
-                help_msg=f"Unexpected positional argument: {unexpected_token}",
+                help_msg=Some(f"Unexpected positional argument: {unexpected_token}"),
             )
-            return CliErr(CliError.UNKNOWN_ARGUMENT, diag)
+            return CliErr(CliError.UNKNOWN_ARGUMENT, Some(diag))
 
         seen = {name for name, _ in parsed_tokens}
         self.explicitly_provided = seen
@@ -392,9 +393,9 @@ class Parser:
                 line_text=raw_cmd_string,
                 col_start=max(0, col_start),
                 col_end=max(0, col_end),
-                help_msg=f"Missing required arguments: {missing_str}",
+                help_msg=Some(f"Missing required arguments: {missing_str}"),
             )
-            return CliErr(CliError.MISSING_REQUIRED_ARGUMENT, diag)
+            return CliErr(CliError.MISSING_REQUIRED_ARGUMENT, Some(diag))
 
         append_started = set()
         result = {a.name: a.default for a in self.args}
@@ -420,13 +421,13 @@ class Parser:
                         line_text=raw_cmd_string,
                         col_start=max(0, col_start),
                         col_end=max(0, col_end),
-                        help_msg=(
+                        help_msg=Some(
                             f"Invalid value for argument '{arg.name}': "
                             f"'{token_val}'. Expected type "
                             f"{arg.arg_type.__name__}."
                         ),
                     )
-                    return CliErr(CliError.INVALID_ARGUMENT_TYPE, diag)
+                    return CliErr(CliError.INVALID_ARGUMENT_TYPE, Some(diag))
             else:
                 if arg.choices and token_val not in arg.choices:
                     val_str = str(token_val) if token_val is not None else ""
@@ -446,9 +447,9 @@ class Parser:
                         line_text=raw_cmd_string,
                         col_start=max(0, col_start),
                         col_end=max(0, col_end),
-                        help_msg=help_msg,
+                        help_msg=Some(help_msg),
                     )
-                    return CliErr(CliError.INVALID_CHOICE, diag)
+                    return CliErr(CliError.INVALID_CHOICE, Some(diag))
 
                 try:
                     result[arg.name] = arg.arg_type(token_val)
@@ -462,13 +463,13 @@ class Parser:
                         line_text=raw_cmd_string,
                         col_start=max(0, col_start),
                         col_end=max(0, col_end),
-                        help_msg=(
+                        help_msg=Some(
                             f"Invalid value for argument '{arg.name}': "
                             f"'{token_val}'. Expected type "
                             f"{arg.arg_type.__name__}."
                         ),
                     )
-                    return CliErr(CliError.INVALID_ARGUMENT_TYPE, diag)
+                    return CliErr(CliError.INVALID_ARGUMENT_TYPE, Some(diag))
 
         return Ok(result)
 
@@ -690,9 +691,9 @@ class Command:
                     line_text=raw_cmd_string,
                     col_start=max(0, col_start),
                     col_end=max(0, col_end),
-                    help_msg=help_msg,
+                    help_msg=Some(help_msg),
                 )
-                return CliErr(CliError.UNKNOWN_ARGUMENT, diag)
+                return CliErr(CliError.UNKNOWN_ARGUMENT, Some(diag))
 
             target_cmd.help()
             raw_cmd_string = " ".join(diagnostic_argv)
@@ -702,9 +703,9 @@ class Command:
                 line_text=raw_cmd_string,
                 col_start=0,
                 col_end=len(raw_cmd_string),
-                help_msg=f"Command '{target_cmd.name}' requires a subcommand.",
+                help_msg=Some(f"Command '{target_cmd.name}' requires a subcommand."),
             )
-            return CliErr(CliError.MISSING_REQUIRED_ARGUMENT, diag)
+            return CliErr(CliError.MISSING_REQUIRED_ARGUMENT, Some(diag))
 
         if target_cmd.schema:
             desc = target_cmd.long or target_cmd.short

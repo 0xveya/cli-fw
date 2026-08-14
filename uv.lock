@@ -489,8 +489,8 @@ wheels = [
 
 [[package]]
 name = "typed-errs"
-version = "0.1.0"
-source = { git = "https://github.com/0xveya/typed-errs#a39d048e252e3f3b3d4e5a03228404c636b4570b" }
+version = "0.0.0"
+source = { git = "https://github.com/0xveya/typed-errs#c937342ed668fafa66859d63faf1c6bc90301784" }
 
 [[package]]
 name = "typing-extensions"
