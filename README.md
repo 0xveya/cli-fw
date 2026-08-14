@@ -31,6 +31,11 @@ parsed = command.execute(["--port", "8080"])
 It supports positional and optional arguments, choices, booleans, lists,
 nested commands, generated help, and typed parse errors.
 
+Parse failures return `Err[CliError]`. Their source diagnostic is stored as
+`Option[Diagnostic]`, and a diagnostic help message is `Option[str]`; use
+`isinstance(value, Some)` when inspecting either field directly, or call
+`Err.print_diagnostic()` to render it.
+
 ## Commands and subcommands
 
 Define arguments in dataclasses, attach each schema to a `Command`, then call
